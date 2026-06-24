@@ -1,51 +1,34 @@
 export const errorHandler = (err, req, res, next) => {
   const statusCode = res.statusCode ? res.statusCode : 500;
 
+  let errorResponse = {
+    title: "",
+    message: err.message,
+    stackTrace: err.stack,
+  };
+
   switch (statusCode) {
     case 400:
-      res.json({
-        title: "VALIDATION_ERROR",
-        message: err.message,
-        stackTrace: err.stack,
-      });
+      errorResponse.title = "VALIDATION_ERROR";
       break;
-
     case 401:
-      res.json({
-        title: "UNAUTHORIZED",
-        message: err.message,
-        stackTrace: err.stack,
-      });
+      errorResponse.title = "UNAUTHORIZED";
       break;
-
     case 403:
-      res.json({
-        title: "FORBIDDEN   ",
-        message: err.message,
-        stackTrace: err.stack,
-      });
+      errorResponse.title = "FORBIDDEN";
       break;
-
     case 404:
-      res.json({
-        title: "NOT FOUND",
-        message: err.message,
-        stackTrace: err.stack,
-      });
+      errorResponse.title = "NOT_FOUND";
       break;
-
     case 500:
-      res.json({
-        title: "SERVER_ERROR",
-        message: err.message,
-        stackTrace: err.stack,
-      });
-      break;
-
     default:
-      console.log("NO ERROR");
+      errorResponse.title = "SERVER_ERROR";
       break;
   }
 
-  res.json({ title: "NOT FOUND", message: err.message, stackTrace: err.stack });
+  // Log the error to terminal for debugging
+  console.error(`[${statusCode}] ${err.message}`);
+
+  // Send JSON response once
+  res.status(statusCode).json(errorResponse);
 };

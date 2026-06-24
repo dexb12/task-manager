@@ -78,6 +78,8 @@ export const loginUser = async (req, res) => {
 
     const payload = {
       id: user._id,
+      username: user.username,
+      email: user.email,
     };
 
     const options = {
@@ -102,5 +104,5 @@ export const loginUser = async (req, res) => {
 };
 
 export const currentUser = async (req, res) => {
-  res.json({ message: "Current user" });
+  res.json(req.user);
 };
