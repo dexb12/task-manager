@@ -24,10 +24,14 @@ export const createTask = async (req, res) => {
         .status(400)
         .json({ message: "Task and Description is required" });
     }
+
+    const user = req.user.id;
+
     const newTask = await Task.create({
       task,
       description,
       status,
+      user,
       tag,
       dueDate,
     });

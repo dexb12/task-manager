@@ -6,11 +6,12 @@ import {
   updateTask,
   deleteTask,
 } from "../controllers/taskController.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.route("/").get(getTasks);
 
-router.route("/").post(createTask);
+router.route("/").post(authMiddleware, createTask);
 
 router.route("/:id").get(getTaskById);
 

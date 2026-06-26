@@ -26,6 +26,7 @@ export const registerUser = async (req, res) => {
 
     const payload = {
       id: user._id,
+      username: user.username,
       email: user.email,
     };
 

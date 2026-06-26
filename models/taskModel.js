@@ -2,11 +2,6 @@ import mongoose from "mongoose";
 
 const taskSchema = mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     task: {
       type: String,
       required: [true, "Please add task title"],
@@ -25,6 +20,11 @@ const taskSchema = mongoose.Schema(
       type: String,
       enum: ["Work", "Personal", "Reporting", "admin"],
       default: "Personal",
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     dueDate: {
       type: Date,
