@@ -13,10 +13,10 @@ router.route("/").get(getTasks);
 
 router.route("/").post(authMiddleware, createTask);
 
-router.route("/:id").get(getTaskById);
+router.route("/:id").get(authMiddleware, getTaskById);
 
-router.route("/:id").put(updateTask);
+router.route("/:id").put(authMiddleware, updateTask);
 
-router.route("/:id").delete(deleteTask);
+router.route("/:id").delete(authMiddleware, deleteTask);
 
 export default router;
