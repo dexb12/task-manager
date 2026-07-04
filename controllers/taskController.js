@@ -2,13 +2,14 @@ import Task from "../models/taskModel.js";
 
 //@desk get all tasks
 //@route GET /api/tasks
-//@access public
+//@access private
 export const getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
+    const tasks = await Task.find({ user: req.user.id });
     return res.status(200).json(tasks);
   } catch (error) {
     console.error("Error fetching contacts: ", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -45,7 +46,7 @@ export const createTask = async (req, res) => {
 
 //@desk get task
 //@route GET /api/tasks/:id
-//@access public
+//@access private
 export const getTaskById = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -66,7 +67,7 @@ export const getTaskById = async (req, res) => {
 
 //@desk update task
 //@route PUT /api/tasks
-//@access public
+//@access private
 export const updateTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -74,9 +75,18 @@ export const updateTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    const updatedTask = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      returnDocument: "after",
-    });
+    // Ownership check
+    if (!task.user || task.user.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this task" });
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: "true" }, // return updated document
+    );
     res.status(200).json(updatedTask);
   } catch (error) {
     console.error(error);
@@ -85,8 +95,8 @@ export const updateTask = async (req, res) => {
 };
 
 //@desk delete task
-//@route DELETE /api/tasks
-//@access public
+//@route DELETE /api/tasks/:id
+//@access private
 export const deleteTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -94,10 +104,19 @@ export const deleteTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
 
-    const deletedTask = await Task.deleteOne({ _id: req.params.id });
+    // Ownership check
+    if (!task.user || task.user.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this task" });
+    }
+
+    const deletedTask = await Task.deleteOne();
     console.log("The deleted task: ", deletedTask);
 
-    res.status(200).json({ message: `Delete task for id ${req.params.id}` });
+    res
+      .status(200)
+      .json({ message: `Task deleted successfully", id:  ${req.params.id}` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
