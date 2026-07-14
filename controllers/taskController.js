@@ -85,7 +85,7 @@ export const updateTask = async (req, res) => {
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: "true" }, // return updated document
+      { returnDocument: "after" }, // return updated document
     );
     res.status(200).json(updatedTask);
   } catch (error) {
@@ -108,15 +108,17 @@ export const deleteTask = async (req, res) => {
     if (!task.user || task.user.toString() !== req.user.id) {
       return res
         .status(403)
-        .json({ message: "Not authorized to update this task" });
+        .json({ message: "Not authorized to delete this task" });
     }
 
-    const deletedTask = await Task.deleteOne();
-    console.log("The deleted task: ", deletedTask);
+    const deletedTask = await Task.findByIdAndDelete(req.params.id);
+    res
+      .status(200)
+      .json({ message: "Task deleted successfully", id: deletedTask._id });
 
     res
       .status(200)
-      .json({ message: `Task deleted successfully", id:  ${req.params.id}` });
+      .json({ message: "Task deleted successfully", id: req.params.id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
