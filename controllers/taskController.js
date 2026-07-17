@@ -105,7 +105,14 @@ export const deleteTask = async (req, res) => {
     }
 
     // Ownership check
-    if (!task.user || task.user.toString() !== req.user.id) {
+    // if (!task.user || task.user.toString() !== req.user.id) {
+    //   return res
+    //     .status(403)
+    //     .json({ message: "Not authorized to delete this task" });
+    // }
+
+    // 🟡 Role-based + ownership check
+    if (req.user.role !== "admin" && task.user.toString() !== req.user.id) {
       return res
         .status(403)
         .json({ message: "Not authorized to delete this task" });
@@ -115,10 +122,6 @@ export const deleteTask = async (req, res) => {
     res
       .status(200)
       .json({ message: "Task deleted successfully", id: deletedTask._id });
-
-    res
-      .status(200)
-      .json({ message: "Task deleted successfully", id: req.params.id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
