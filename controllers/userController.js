@@ -22,12 +22,14 @@ export const registerUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      role: "user",
     });
 
     const payload = {
       id: user._id,
       username: user.username,
       email: user.email,
+      role: user.role,
     };
 
     const options = {
@@ -81,6 +83,7 @@ export const loginUser = async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      role: user.role,
     };
 
     const options = {
@@ -96,6 +99,7 @@ export const loginUser = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -114,8 +118,87 @@ export const currentUser = async (req, res) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      role: user.role,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateUserRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+
+    if (!["user", "admin"].includes(role)) {
+      res.status(400).json({ message: "Not valid role type" });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.role = role;
+    await user.save();
+
+    res.json({
+      message: "Role updated successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this user" });
+    }
+
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    res
+      .status(200)
+      .json({ message: "User deleted successfully", id: deletedUser._id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
