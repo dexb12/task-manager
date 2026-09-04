@@ -21,7 +21,7 @@ router.patch(
   authorizeRoles("admin"),
   updateUserRole,
 );
-router.delete("/:id/role", deleteUser);
+router.delete("/:id/role", authMiddleware, authorizeRoles("admin"), deleteUser);
 router.get("/:id", getUserById);
 router.get("/", getAllUsers);
 
